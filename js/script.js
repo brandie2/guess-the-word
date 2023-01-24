@@ -7,9 +7,22 @@ const remainingGuessesSpan = document.querySelector(".remaining span");
 const message = document.querySelector(".message");
 const playAgainButton = document.querySelector(".play-again");
 
-const word = "magnolia";
+let word = "magnolia";
 const guessedLetters = [];
+let remainingGuesses = 8;
 
+
+//async function to pull words
+const getWord = async function () {
+    const response = await fetch("https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt");
+    const words = await response.text();
+    const wordArray = words.split("\n");
+    const randomIndex = Math.floor(Math.random() * wordArray.length);
+    word = wordArray[randomIndex].trim();
+    placeholder(word);
+};
+
+getWord();
 // Display our symbols as placeholders for the chosen word's letters
 const placeholder = function (word) {
   const placeholderLetters = [];
@@ -64,6 +77,7 @@ const makeGuess = function (guess) {
     console.log(guessedLetters);
     //letter displays when it hasnt been guessed before
     allGuessedLetters();
+    updateGuessesRemaining(guess);
     updateWordInProgress(guessedLetters);
   }
 };
@@ -96,6 +110,26 @@ const allGuessedLetters = function () {
         playerWon();
       
     };
+    
+    //function to count guesses remaining
+   const updateGuessesRemaining = function (guess) {
+  const upperWord = word.toUpperCase();
+  if (!upperWord.includes(guess)) {
+    // womp womp - bad guess, lose a chance
+    message.innerText = `Sorry, the word has no ${guess}.`;
+    remainingGuesses -= 1;
+  } else {
+    message.innerText = `Good guess! The word has the letter ${guess}.`;
+  }
+
+  if (remainingGuesses === 0) {
+    message.innerHTML = `Game over! The word was <span class="highlight">${word}</span>.`;
+  } else if (remainingGuesses === 1) {
+    remainingGuessesSpan.innerText = `${remainingGuesses} guess`;
+  } else {
+    remainingGuessesSpan.innerText = `${remainingGuesses} guesses`;
+  }
+};
 
     //function to check if player won
     const playerWon = function () {
@@ -104,3 +138,5 @@ const allGuessedLetters = function () {
             message.innerHTML = `<p class="highlight">You Guessed the Correct Word! Congrats!</p>`;
         }
     };
+
+    
